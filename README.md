@@ -119,16 +119,13 @@ main ブランチの変更により、Cloud Deploy にリリースが作成さ�
 mkdir -p .github/workflows
 cat << EOF >.github/workflows/release.yaml
 name: Release
-
 on:
   push:
     branches:
       - main
-
 env:
   GOOGLECLOUD_REGION: "asia-northeast1"
   CLOUDDEPLOY_REGION: "us-central1"
-
 jobs:
   lint-code:
     name: Lint code
@@ -142,7 +139,6 @@ jobs:
         version: v1.42
         working-directory: src
         skip-go-installation: true
-
   lint-template:
     name: Test templates
     runs-on: ubuntu-latest
@@ -162,7 +158,6 @@ jobs:
       with:
         manifests: |
             prod.yaml
-
   release:
     name: Release
     needs: 
@@ -172,32 +167,26 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
-
     - name: Setup gcloud
       uses: google-github-actions/setup-gcloud@master
       with:
         project_id: \${{ secrets.GOOGLECLOUD_PROJECT_ID }}
         service_account_key: \${{ secrets.GOOGLECLOUD_SA_KEY }}
         export_default_credentials: true
-
     - name: Setup credential helper
       run: gcloud auth configure-docker "\${{ env.GOOGLECLOUD_REGION}}-docker.pkg.dev"
-
     - name: Install Skaffold
       run: |
         curl -Lo skaffold https://storage.googleapis.com/skaffold/releases/latest/skaffold-linux-amd64
         chmod +x skaffold && sudo mv skaffold /usr/local/bin
         skaffold version
-
     - name: Build & Push
       run: skaffold build --default-repo '\${{ env.GOOGLECLOUD_REGION}}-docker.pkg.dev/\${{ secrets.GOOGLECLOUD_PROJECT_ID }}/cd-demo' --push --file-output=build.out
-
     - name: Archive the build result
       uses: actions/upload-artifact@v2
       with:
         name: build-result
         path: build.out
-
     - name: Make a release
       run: |
         gcloud components install beta

@@ -1,0 +1,16 @@
+apiVersion: skaffold/v1
+kind: Config
+build:
+  artifacts:
+  - image: app
+    context: src
+    buildpack:
+      builder: "gcr.io/buildpacks/builder:v1"
+deploy:
+  kustomize:
+    path: deploy/k8s/base
+profiles:
+  - name: prod
+    deploy:
+      kustomize:
+        path: deploy/k8s/overlays/prod
